@@ -402,6 +402,49 @@ public class ProfilesAPI {
             }
             
         }
+
+	/**
+	 * Add a new token to the profile. It gets appended to the end of the list of
+	 * cards. Make sure your Merchant account can support more cards. The
+	 * default amount is 1. You can change this limit in the online Members area
+	 * for Merchants located at: https://www.beanstream.com/admin/sDefault.asp
+	 * and heading to Configuration : Payment Profile Configuration
+	 *
+	 * @param profileId The profile id.
+	 * @param token The token to add.
+	 * @return ProfileResponse
+	 * @throws BeanstreamApiException when not successful
+	 */
+	public ProfileResponse addToken(String profileId, Token token)
+			throws BeanstreamApiException {
+		ProfilesUtils.validateProfileId(profileId);
+		String url = PaymentsUrls.getProfileCardsUrl(config.getPlatform(),
+				config.getVersion(), profileId);
+
+		ProfilesUtils.validateToken(token);
+
+		TokenWrapper cw = new TokenWrapper(token);
+		String response = connector.ProcessTransaction(HttpMethod.post, url, token);
+		return gson.fromJson(response, ProfileResponse.class);
+
+	}
+
+	private class TokenWrapper {
+		private Token token;
+
+		public TokenWrapper(Token token) {
+			this.token = token;
+		}
+
+		public Token getToken() {
+			return token;
+		}
+
+		public void setToken(Token token) {
+			this.token = token;
+		}
+
+	}
 	/**
 	 * Removes the card from the profile. Card IDs are their index in
 	 * getCards(), starting a 1 and going up: 1, 2, 3, 4...
